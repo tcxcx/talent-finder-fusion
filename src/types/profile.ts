@@ -9,6 +9,9 @@ export interface Profile {
     linkedin?: string;
   };
   matchScore: number;
+  location?: string;
+  experience?: string;
+  portfolio?: string;
 }
 
 export interface SearchFilters {

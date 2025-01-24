@@ -1,49 +1,58 @@
 import { useEffect, useState } from "react";
 import ProfileCard from "./ProfileCard";
+import { aiMatchProfiles } from "@/utils/aiMatching";
+import type { Profile } from "@/types/profile";
 
-// Simulated AI matching function (replace with actual AI implementation)
-const simulateAIMatching = (query: string) => {
-  // Dummy data for demonstration
-  return [
-    {
-      name: "Alex Chen",
-      role: "Senior Game Developer",
-      avatar: "/placeholder.svg",
-      skills: ["Unity", "C#", "Game Design", "3D Modeling"],
-      social: {
-        github: "https://github.com",
-        twitter: "https://twitter.com",
-        linkedin: "https://linkedin.com",
-      },
-      matchScore: 95,
+// Sample profiles database (in a real app, this would come from an API)
+const profilesDatabase: Profile[] = [
+  {
+    name: "Alex Chen",
+    role: "Senior Game Developer",
+    avatar: "/placeholder.svg",
+    skills: ["Unity", "C#", "Game Design", "3D Modeling", "Unreal Engine", "Animation"],
+    social: {
+      github: "https://github.com",
+      twitter: "https://twitter.com",
+      linkedin: "https://linkedin.com",
     },
-    {
-      name: "Sarah Johnson",
-      role: "UI/UX Designer",
-      avatar: "/placeholder.svg",
-      skills: ["Figma", "UI Design", "User Research", "Prototyping"],
-      social: {
-        github: "https://github.com",
-        linkedin: "https://linkedin.com",
-      },
-      matchScore: 88,
+    matchScore: 0,
+  },
+  {
+    name: "Sarah Johnson",
+    role: "UI/UX Designer",
+    avatar: "/placeholder.svg",
+    skills: ["Figma", "UI Design", "User Research", "Prototyping", "Game UI", "Unity"],
+    social: {
+      github: "https://github.com",
+      linkedin: "https://linkedin.com",
     },
-    {
-      name: "Mike Williams",
-      role: "Technical Artist",
-      avatar: "/placeholder.svg",
-      skills: ["Unreal Engine", "Maya", "Substance Painter", "VFX"],
-      social: {
-        twitter: "https://twitter.com",
-        linkedin: "https://linkedin.com",
-      },
-      matchScore: 82,
+    matchScore: 0,
+  },
+  {
+    name: "Mike Williams",
+    role: "Technical Artist",
+    avatar: "/placeholder.svg",
+    skills: ["Unreal Engine", "Maya", "Substance Painter", "VFX", "Houdini", "ZBrush"],
+    social: {
+      twitter: "https://twitter.com",
+      linkedin: "https://linkedin.com",
     },
-  ];
-};
+    matchScore: 0,
+  },
+  {
+    name: "Emma Rodriguez",
+    role: "Game Producer",
+    avatar: "/placeholder.svg",
+    skills: ["Project Management", "Agile", "Scrum", "Game Development", "Team Leadership"],
+    social: {
+      linkedin: "https://linkedin.com",
+    },
+    matchScore: 0,
+  },
+];
 
 const SearchResults = ({ query }: { query: string }) => {
-  const [results, setResults] = useState<any[]>([]);
+  const [results, setResults] = useState<Profile[]>([]);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -51,13 +60,31 @@ const SearchResults = ({ query }: { query: string }) => {
       setLoading(true);
       // Simulate API delay
       await new Promise((resolve) => setTimeout(resolve, 1000));
-      const matchedProfiles = simulateAIMatching(query);
+
+      // Parse query into skills
+      const querySkills = query
+        .toLowerCase()
+        .split(',')
+        .map(skill => skill.trim())
+        .filter(skill => skill.length > 0);
+
+      // Use AI matching engine to find best matches
+      const matchedProfiles = aiMatchProfiles(
+        {
+          skills: querySkills,
+          role: query, // Also consider the entire query as a potential role
+        },
+        profilesDatabase
+      );
+
       setResults(matchedProfiles);
       setLoading(false);
     };
 
     if (query) {
       fetchResults();
+    } else {
+      setResults([]);
     }
   }, [query]);
 

@@ -16,6 +16,9 @@ const profilesDatabase: Profile[] = [
       linkedin: "https://linkedin.com",
     },
     matchScore: 0,
+    location: "San Francisco, CA",
+    experience: "8+ years",
+    portfolio: "https://portfolio.com",
   },
   {
     name: "Sarah Johnson",
@@ -27,6 +30,8 @@ const profilesDatabase: Profile[] = [
       linkedin: "https://linkedin.com",
     },
     matchScore: 0,
+    location: "London, UK",
+    experience: "5+ years",
   },
   {
     name: "Mike Williams",
@@ -38,6 +43,9 @@ const profilesDatabase: Profile[] = [
       linkedin: "https://linkedin.com",
     },
     matchScore: 0,
+    location: "Vancouver, Canada",
+    experience: "6+ years",
+    portfolio: "https://artstation.com",
   },
   {
     name: "Emma Rodriguez",
@@ -48,18 +56,20 @@ const profilesDatabase: Profile[] = [
       linkedin: "https://linkedin.com",
     },
     matchScore: 0,
+    location: "Madrid, Spain",
+    experience: "7+ years",
   },
 ];
 
 const SearchResults = ({ query }: { query: string }) => {
   const [results, setResults] = useState<Profile[]>([]);
   const [loading, setLoading] = useState(false);
+  const [streamedResults, setStreamedResults] = useState<Profile[]>([]);
 
   useEffect(() => {
     const fetchResults = async () => {
       setLoading(true);
-      // Simulate API delay
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      setStreamedResults([]);
 
       // Parse query into skills
       const querySkills = query
@@ -72,10 +82,16 @@ const SearchResults = ({ query }: { query: string }) => {
       const matchedProfiles = aiMatchProfiles(
         {
           skills: querySkills,
-          role: query, // Also consider the entire query as a potential role
+          role: query,
         },
         profilesDatabase
       );
+
+      // Simulate streaming results
+      for (let i = 0; i < matchedProfiles.length; i++) {
+        await new Promise(resolve => setTimeout(resolve, 500));
+        setStreamedResults(prev => [...prev, matchedProfiles[i]]);
+      }
 
       setResults(matchedProfiles);
       setLoading(false);
@@ -85,13 +101,14 @@ const SearchResults = ({ query }: { query: string }) => {
       fetchResults();
     } else {
       setResults([]);
+      setStreamedResults([]);
     }
   }, [query]);
 
-  if (loading) {
+  if (loading && streamedResults.length === 0) {
     return (
-      <div className="w-full max-w-4xl mx-auto p-6 text-center text-muted-foreground">
-        Loading results...
+      <div className="w-full max-w-4xl mx-auto p-6 text-center text-muted-foreground animate-pulse">
+        Finding the best matches...
       </div>
     );
   }
@@ -106,8 +123,8 @@ const SearchResults = ({ query }: { query: string }) => {
 
   return (
     <div className="w-full max-w-4xl mx-auto p-6">
-      <div className="grid grid-cols-1 gap-6 animate-fade-in">
-        {results.map((profile, index) => (
+      <div className="grid grid-cols-1 gap-6">
+        {streamedResults.map((profile, index) => (
           <ProfileCard key={index} profile={profile} />
         ))}
       </div>
